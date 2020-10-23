@@ -125,6 +125,135 @@ var controller = {
                 articles
             });
         });
+    },
+
+    getArticle: function(req,res){
+        //Recollir el id de la URL
+        var id = req.params.id;
+        //Comprovar que existeix i no es null o undefined
+        if(id || id!=null){
+            //Buscar l'article
+            Article.findById(id, (err,articleTrobat)=>{
+                //Si surt error al recuperar l'article
+                if(err){
+                    return res.status(500).send({
+                        status: "Error",
+                        mensaje: "Error al devolver los datos"
+                    }); 
+                }
+
+                //Si no troba l'article retornem error 404
+                if(!articleTrobat){
+                    return res.status(404).send({
+                        status: "Error",
+                        mensaje: "Error no existe el articulo"
+                    }); 
+                }
+
+                //Si tot va bé retornem l'article
+                return res.status(200).send({
+                    status: "Success",
+                    articleTrobat
+                }); 
+            });
+        }
+        //Si no tenim id o és null
+        else{
+            return res.status(404).send({
+                status: "Error",
+                mensaje: "Error en la ruta"
+            }); 
+        }
+    },
+
+    update: (req,res) =>{
+
+        //Recollir id del article a actualtizar que arriba per la URL
+        console.log(req.params);
+        var id = req.params.id;
+        if(!id || id==undefined){
+            return res.status(500).send({
+                status:"Error",
+                mensaje:"Error problemas al recibir el id"
+            });
+        }
+        //Recollir les dades noves que arribaran en el body ja que serà una resposta de formulari
+        var dades = req.body;
+        //Validar les dades
+        try {
+            var validated_title = !validator.isEmpty(dades.title);
+            var validated_content = !validator.isEmpty(dades.content);
+        } catch (error) {
+            return res.status(500).send({
+                status:"Error",
+                mensaje:"Error validando los datos"
+            });
+        }
+
+        //Si tot es vàlid
+        if(validated_title && validated_content){
+            /*
+            Fem ús del findOneAndUpdate
+            Indiquem el id de l'objecte a buscar i actualitzar
+            Les dades que volem actualitzar, en aquest cas son les que rebem per la request.body
+            Posem que ens retorni l'article nou, no el vell
+            La funció de Callback on rebem un err si hi ha i l'article actualtizat.
+            */
+            Article.findOneAndUpdate({_id:id},dades,{new:true},(err,articleUpdated)=>{
+                //Si passa algun error tornem error
+                if(err){
+                    return res.status(500).send({
+                        status:"Error",
+                        mensaje:"Error validando los datos"
+                    });
+                }
+
+                //Si tot va bé tornem l'objecte actualitzat
+                return res.status(500).send({
+                    status:"Success",
+                    articleUpdated
+                });
+            });
+            
+        }
+
+    },
+
+    delete: (req,res)=>{
+        //Recollir el id que ens arriba per la url
+        var id = req.params.id;
+        //Validar el id
+        if(!id || id==undefined){
+            return res.status(500).send({
+                status:"Error",
+                mensaje:"No se ha recibido ningún id"
+            })
+        }
+        else{
+            Article.findOneAndDelete({_id:id}, (err,articleRemoved)=>{
+                //Si passa algun error tornem error
+                if(err){
+                    return res.status(500).send({
+                        status:"Error",
+                        mensaje:"Error validando los datos"
+                    });
+                }
+
+                if(!articleRemoved){
+                    return res.status(500).send({
+                        status:"Error",
+                        mensaje:"No se ha podido borrar el articulo"
+                    });
+                }
+
+                //si no entra a cap if retornar article borrat
+                return res.status(200).send({
+                    status:"Success",
+                    articleRemoved
+                });
+
+            });
+        }
     }
 };
 
