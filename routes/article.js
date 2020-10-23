@@ -11,10 +11,10 @@ var router = express.Router();
 //Definim les rutes i el mètode que criden del controlador
     //Rutes Test
 router.post('/datos-curso', articleController.datosCurso);
-router.get('/test-controlador-article', articleController.test);
+router.get('/test-controlador-article/:opcional?', articleController.test);
     //Rutes Utils
 router.post('/save',articleController.save);
-router.get('/articles',articleController.list);
+router.get('/articles/:last?',articleController.list);
 
 //Exportem el router
 module.exports = router;

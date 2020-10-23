@@ -4,6 +4,7 @@
 var validator = require('validator');
 //Importem el model Article per crear objectes
 var Article = require('../models/article');
+const { param } = require('../routes/article');
 
 var controller = {
     //Rutas Test
@@ -18,9 +19,20 @@ var controller = {
     },
 
     test: function(req,res){
-        return res.status(200).send({
-            mensaje: "Hola des de ArticleController metodo test"
-        });
+        //Recogemos los parametros de la URL
+        var params = req.params;
+        //Miramos si tiene parametro opcional
+        if(params.opcional){
+            return res.status(200).send({
+                mensaje: "Hola des de ArticleController metodo test con parametro opcional",
+                opcional: params.opcional
+            });
+        }else{
+            return res.status(200).send({
+                mensaje: "Hola des de ArticleController metodo test"
+            });
+        }
+
     },
 
     //Rutas Utiles
@@ -79,20 +91,35 @@ var controller = {
     },
 
     list: function(req,res){
-        //Recuperar los articulos
-        Article.find().exec((err,articles)=>{
+
+        //Creem una query bàsica que retorna tota la llista
+        var query = Article.find();
+
+        //Mirem si rebem el paràmetre opcional last
+        var last = req.params.last;
+
+        //Si tenim el last o és diferent a undefined
+        if(last || last!=undefined){
+            query = query.limit(3);
+        }
+
+        //Executem la query modificada i que ens ordeni per ID
+        query.sort('-date').exec((err,articles)=>{
+            //Si error, retornem missatge d'error
             if(err){
                 return res.status(400).send({
                     status: "Error",
                     mensaje: "Error al devolver los articulos"
                 });
             }
+            //Si no tenim articles a tornar tornem missatge
             if(!articles){
                 return res.status(200).send({
                     status: "Success",
                     mensaje: "No hay articulos para mostrar"
                 });
             }
+            //Si tot està OK retornem els articles.
             return res.status(200).send({
                 status:"Succes",
                 articles
