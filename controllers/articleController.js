@@ -41,31 +41,63 @@ var controller = {
             
         } catch (error) {
             return res.status(200).send({
-                mensaje:"Datos incorrectos o faltan datos"
+                status: "Error",
+                mensaje:"Datos incorrectos o faltan datos durante la validacion"
             });
         }
 
         if(validate_title && validate_content){
 
             //Crear el objeto a guardar
+            var article = new Article();
 
             //Assignar valores al objeto
+            article.title = params.title;
+            article.content = params.content;
+            article.image = null;
 
-            //Guardar el objeto(articulo)
+            //Guardar el objeto(articulo) utilizamos el metodo save que es proprocionado por Schema de Mongoose
+            article.save((err,articleStored) => {
 
-            //Devolver una respuesta
+                //Si hay error o no hay articulo a guardar
+                if(err || !articleStored){
+                    return res.status(400).send({
+                        status:"Error",
+                        mensaje: "Articulo no guardado"
+                    })
+                }
+
+                //Devolver una respuesta cuando se ha guardado
+                return res.status(200).send({
+                    status: "Success",
+                    article: articleStored
+                });
+
+            });
+
+        }
+    },
+
+    list: function(req,res){
+        //Recuperar los articulos
+        Article.find().exec((err,articles)=>{
+            if(err){
+                return res.status(400).send({
+                    status: "Error",
+                    mensaje: "Error al devolver los articulos"
+                });
+            }
+            if(!articles){
+                return res.status(200).send({
+                    status: "Success",
+                    mensaje: "No hay articulos para mostrar"
+                });
+            }
             return res.status(200).send({
-                mensaje: "Soy la funcion save de articleController"
+                status:"Succes",
+                articles
             });
-
-        }
-        //Si no retornem un missatge d'error
-        else{
-            return res.status(400).send({
-                mensaje:"Datos incorrectos"
-            });
-        }
-
+        });
     }
 };
 

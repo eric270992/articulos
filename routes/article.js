@@ -14,6 +14,7 @@ router.post('/datos-curso', articleController.datosCurso);
 router.get('/test-controlador-article', articleController.test);
     //Rutes Utils
 router.post('/save',articleController.save);
+router.get('/articles',articleController.list);
 
 //Exportem el router
 module.exports = router;
